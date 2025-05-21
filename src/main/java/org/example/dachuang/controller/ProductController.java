@@ -1,6 +1,5 @@
 package org.example.dachuang.controller;
 
-import org.example.dachuang.dto.CategoryDto;
 import org.example.dachuang.dto.ProductDto;
 import org.example.dachuang.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
