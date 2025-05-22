@@ -38,7 +38,9 @@ public class ProductService {
 
     private CategoryDto convertToCategoryDto(Category category) {
         CategoryDto categoryDto = new CategoryDto();
-        BeanUtils.copyProperties(category, categoryDto);
+        BeanUtils.copyProperties(category, categoryDto); // 这会复制包括 imageUrl 在内的所有匹配字段
+        // 如果 imageUrl 字段名在 Category 和 CategoryDto 中不完全一样，需要手动设置：
+        // categoryDto.setImageUrl(category.getImageUrl()); // 如果BeanUtils.copyProperties不能正确复制
         return categoryDto;
     }
     // --- End DTO转换 ---
