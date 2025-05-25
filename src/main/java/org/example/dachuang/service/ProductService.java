@@ -1,5 +1,6 @@
 package org.example.dachuang.service;
 
+import org.example.dachuang.dto.ProductAdminRequestDto;
 import org.example.dachuang.dto.CategoryDto;
 import org.example.dachuang.dto.ProductDto;
 import org.example.dachuang.exception.ResourceNotFoundException;
@@ -103,5 +104,58 @@ public class ProductService {
 
         Product updatedProduct = productRepository.save(product);
         return convertToProductDto(updatedProduct);
+    }
+
+    @Transactional
+    public ProductDto createProduct(ProductAdminRequestDto requestDto) {
+        Category category = categoryRepository.findById(requestDto.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + requestDto.getCategoryId()));
+
+        Product product = new Product();
+        product.setName(requestDto.getName());
+        product.setDescription(requestDto.getDescription());
+        product.setPrice(requestDto.getPrice());
+        product.setImageUrl(requestDto.getImageUrl());
+        product.setStock(requestDto.getStock());
+        product.setIsRecommended(requestDto.getIsRecommended() != null ? requestDto.getIsRecommended() : false);
+        product.setCategory(category);
+
+        Product savedProduct = productRepository.save(product);
+        return convertToProductDto(savedProduct);
+    }
+
+    @Transactional
+    public ProductDto adminUpdateProduct(Long id, ProductAdminRequestDto requestDto) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+
+        Category category = categoryRepository.findById(requestDto.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + requestDto.getCategoryId()));
+
+        product.setName(requestDto.getName());
+        product.setDescription(requestDto.getDescription());
+        product.setPrice(requestDto.getPrice());
+        product.setImageUrl(requestDto.getImageUrl());
+        product.setStock(requestDto.getStock());
+        product.setIsRecommended(requestDto.getIsRecommended() != null ? requestDto.getIsRecommended() : false);
+        product.setCategory(category);
+
+        Product updatedProduct = productRepository.save(product);
+        return convertToProductDto(updatedProduct);
+    }
+
+    @Transactional
+    public void deleteProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+        // 注意：如果订单项中有外键关联到产品，直接删除可能会失败或导致问题。
+        // 可能需要先检查是否有订单关联，或者设置软删除。
+        productRepository.delete(product);
+    }
+
+    // 管理端获取所有产品 (可能与公共接口返回内容或过滤条件不同)
+    @Transactional(readOnly = true)
+    public List<ProductDto> adminGetAllProducts() {
+        return productRepository.findAll().stream().map(this::convertToProductDto).collect(Collectors.toList());
     }
 }

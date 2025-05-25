@@ -5,6 +5,7 @@ import org.example.dachuang.dto.OrderItemRequestDto;
 import org.example.dachuang.dto.OrderRequestDto;
 import org.example.dachuang.dto.OrderResponseDto;
 import org.example.dachuang.dto.OrderItemResponseDto;
+import org.example.dachuang.exception.ResourceNotFoundException;
 import org.example.dachuang.model.Order;
 import org.example.dachuang.model.OrderItem;
 import org.example.dachuang.model.Product;
@@ -14,6 +15,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.example.dachuang.model.Order;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,5 +87,19 @@ public class OrderService {
         return orderRepository.findAll().stream()
                 .map(this::convertToOrderResponseDto)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public OrderResponseDto updateOrderStatus(Long orderId, String newStatus) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + orderId));
+
+        // TODO: 在这里可以添加校验逻辑，例如检查状态转换是否有效
+        // (e.g., 不能从 "Delivered" 改回 "Processing")
+        // TODO: 如果状态变为 "Cancelled"，可能需要恢复商品库存
+
+        order.setStatus(newStatus);
+        Order updatedOrder = orderRepository.save(order);
+        return convertToOrderResponseDto(updatedOrder);
     }
 }
