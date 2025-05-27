@@ -15,8 +15,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.example.dachuang.model.Order;
-
+// import org.example.dachuang.model.Order; // Redundant import
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +40,9 @@ public class OrderService {
     private OrderItemResponseDto convertToOrderItemResponseDto(OrderItem orderItem) {
         OrderItemResponseDto dto = new OrderItemResponseDto();
         BeanUtils.copyProperties(orderItem, dto);
+        // 如果 OrderItemResponseDto 需要 productId 但 OrderItem 中是 Product 对象，
+        // 或者 OrderItem 中 productId 字段名不同，这里可能需要手动映射，但您当前的 OrderItem 已经有 productId 字段
+        // dto.setProductId(orderItem.getProductId()); // 确保 OrderItem 中有 getProductId()
         return dto;
     }
     // --- End DTO转换 ---
@@ -62,7 +64,7 @@ public class OrderService {
             }
 
             OrderItem orderItem = new OrderItem();
-            orderItem.setProductId(product.getId());
+            orderItem.setProductId(product.getId()); //
             orderItem.setProductName(product.getName());
             orderItem.setPriceAtOrder(product.getPrice()); // 记录下单时价格
             orderItem.setImageUrl(product.getImageUrl());
@@ -87,6 +89,13 @@ public class OrderService {
         return orderRepository.findAll().stream()
                 .map(this::convertToOrderResponseDto)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public OrderResponseDto getOrderById(Long orderId) { // <-- 新增的方法
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + orderId));
+        return convertToOrderResponseDto(order);
     }
 
     @Transactional

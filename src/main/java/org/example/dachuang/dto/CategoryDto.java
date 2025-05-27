@@ -6,5 +6,6 @@ import lombok.Data;
 public class CategoryDto {
     private Long id;
     private String name;
-    private String imageUrl; // 新增字段
+    private String imageUrl;
+    private String mainCategory; // 新增：大类字段
 }

@@ -4,7 +4,7 @@ import org.example.dachuang.dto.CategoryDto;
 import org.example.dachuang.exception.ResourceNotFoundException;
 import org.example.dachuang.model.Category;
 import org.example.dachuang.repository.CategoryRepository;
-import org.example.dachuang.repository.ProductRepository; // 用于检查分类是否被产品使用
+import org.example.dachuang.repository.ProductRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,19 +20,22 @@ public class CategoryService {
     private CategoryRepository categoryRepository;
 
     @Autowired
-    private ProductRepository productRepository; // 用于删除分类前的检查
+    private ProductRepository productRepository;
 
     private CategoryDto convertToCategoryDto(Category category) {
         CategoryDto categoryDto = new CategoryDto();
         BeanUtils.copyProperties(category, categoryDto);
+        // BeanUtils 应该会自动复制 mainCategory，因为字段名相同
+        // 如果没有，可以手动设置: categoryDto.setMainCategory(category.getMainCategory());
         return categoryDto;
     }
 
     @Transactional
-    public CategoryDto createCategory(CategoryDto categoryDto) { // 可以复用CategoryDto作为请求
+    public CategoryDto createCategory(CategoryDto categoryDto) {
         Category category = new Category();
         category.setName(categoryDto.getName());
         category.setImageUrl(categoryDto.getImageUrl());
+        category.setMainCategory(categoryDto.getMainCategory()); // 设置 mainCategory
         Category savedCategory = categoryRepository.save(category);
         return convertToCategoryDto(savedCategory);
     }
@@ -56,6 +59,7 @@ public class CategoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
         category.setName(categoryDto.getName());
         category.setImageUrl(categoryDto.getImageUrl());
+        category.setMainCategory(categoryDto.getMainCategory()); // 更新 mainCategory
         Category updatedCategory = categoryRepository.save(category);
         return convertToCategoryDto(updatedCategory);
     }
@@ -65,7 +69,6 @@ public class CategoryService {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
 
-        // 检查是否有产品关联到此分类
         if (!productRepository.findByCategoryId(id).isEmpty()) {
             throw new IllegalStateException("Cannot delete category with id: " + id + " as it has associated products.");
         }

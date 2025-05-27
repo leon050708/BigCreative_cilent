@@ -27,4 +27,10 @@ public class OrderController {
     public ResponseEntity<List<OrderResponseDto>> getAllOrders() {
         return ResponseEntity.ok(orderService.getAllOrders());
     }
+
+    @GetMapping("/{orderId}") // <-- 新增的端点
+    public ResponseEntity<OrderResponseDto> getOrderById(@PathVariable Long orderId) {
+        OrderResponseDto order = orderService.getOrderById(orderId);
+        return ResponseEntity.ok(order);
+    }
 }

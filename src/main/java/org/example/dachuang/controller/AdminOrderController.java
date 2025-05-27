@@ -29,12 +29,10 @@ public class AdminOrderController {
     @GetMapping("/{id}")
     // @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<OrderResponseDto> getOrderByIdForAdmin(@PathVariable Long id) {
-        // 您需要在 OrderService 中添加一个 getOrderById 方法
-        // OrderResponseDto order = orderService.getOrderById(id);
-        // return ResponseEntity.ok(order);
-        // 为简化，暂时省略此方法，您可以仿照 ProductService.getProductById 实现
-        // 或者直接让管理员从列表查看详情，不提供单独的ID查询接口
-        throw new UnsupportedOperationException("getOrderByIdForAdmin not fully implemented yet.");
+        // 现在使用 OrderService 中的 getOrderById 方法
+        OrderResponseDto order = orderService.getOrderById(id);
+        return ResponseEntity.ok(order);
+        // throw new UnsupportedOperationException("getOrderByIdForAdmin not fully implemented yet."); // 旧代码
     }
 
 
